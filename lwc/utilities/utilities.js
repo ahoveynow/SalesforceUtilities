@@ -5,7 +5,8 @@
  * The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
  * -----------------------------------------------------
  * Note: Some of these utility methods on their own are generic enough that they may not
- * justify copyright. Use good judgement if you choose to use it without the copyright notice.
+ * justify copyright. Use good judgement if you choose to use them without the copyright notice.
+ * If you include the JSDoc comments, you must include the copyright notice.
  */
 
 /**
