@@ -1,5 +1,10 @@
+# MIT License
+# Copyright (c) 2022 Andrew Hovey
+# Full License Text: https://ahovey.com/MITLicense.html
+# The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
+
 # run "python generateApexDocs.py" to execute this file.
-# SfApexDoc.jar must be in the same directory that this file is in.
+# SfApexDoc.jar must be in the same directory that this file is in (Download: https://gitlab.com/StevenWCox/sfapexdoc/-/wikis/home)
 
 import subprocess
 import os
