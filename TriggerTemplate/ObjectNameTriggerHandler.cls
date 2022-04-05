@@ -1,3 +1,10 @@
+/**
+ * MIT License
+ * Copyright (c) 2022 Andrew Hovey
+ * Full License Text: https://ahovey.com/MITLicense.html
+ * The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
+ */
+
 /* Class is without sharing because it is for a trigger,
  * which runs in System Context. */
 public without sharing class ObjectNameTriggerHandler {
