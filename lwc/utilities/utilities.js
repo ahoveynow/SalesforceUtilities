@@ -1,4 +1,14 @@
 /**
+ * MIT License
+ * Copyright (c) 2022 Andrew Hovey
+ * Full License Text: https://ahovey.com/MITLicense.html
+ * The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
+ * -----------------------------------------------------
+ * Note: Some of these utility methods on their own are generic enough that they may not
+ * justify copyright. Use good judgement if you choose to use it without the copyright notice.
+ */
+
+/**
  * Converts a rem value to a pixel value.
  * @param {Number} rem The rem ("root em") value to be converted.
  * @returns {Number} The number of pixels after conversion.
