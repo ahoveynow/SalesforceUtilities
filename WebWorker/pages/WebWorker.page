@@ -1,0 +1,120 @@
+<!--
+ * MIT License
+ * Copyright (c) 2022 Andrew Hovey
+ * Full License Text: https://ahovey.com/MITLicense.html
+ * The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
+ * -----------------------------------------------------
+ * NOTICE: THIS IS A WORK IN PROGRESS
+-->
+
+<apex:page>
+    <script>
+
+        let activeWorkers = {};
+
+        /************************************/
+        /* DIFFERENT WAYS TO RUN JAVASCRIPT */
+
+        /* OPTION 1: Dynamic Javascript */
+        const create_dynamicJS = (workerId, code = '') => {
+            let blob = new Blob(
+                [code],
+                { type: "text/javascript" }
+            );
+
+            // This initializes the JS Code
+            let worker = new Worker(window.URL.createObjectURL(blob));
+            worker.onerror = (err) => {
+                throwError(workerId, {
+                    message: err.message,
+                    stack: `Line: ${err.lineno}, Col: ${err.colno}`,
+                    filename: 'Inline Content',
+                });
+            };
+            worker.onmessage = getWorkerResponseHandler(workerId);
+            activeWorkers[workerId] = worker;
+        };
+
+
+        const execute_dynamicJS = (workerId, code, methodToCall, methodParams) => {
+            // Add code to call a function in the provided code
+            if (methodToCall) {
+                code += `
+                    addEventListener('message', (executeEvent) => {
+                        let methodToCall = executeEvent.data.methodToCall;
+                        if (!methodToCall) { return; }
+                        let params = executeEvent.data.params || [];
+                        let namedFunction = eval(methodToCall);
+                        namedFunction(...params);
+                    });
+                `;
+            }
+            
+            create_dynamicJS(workerId, code);
+            postMessageToWorker(
+                workerId,
+                {
+                    methodToCall: methodToCall,
+                    params: methodParams,
+                }
+            );
+        }
+
+
+
+        /* OPTION 2: Imported from File */
+        // TO-DO
+
+        /************************************/
+
+    
+        const getWorkerResponseHandler = (workerId) => {
+            return (workerEvent) => {
+                let workerResponse = workerEvent.data;
+                postMessageToParentLWC({
+                    workerId: workerId,
+                    success: true,
+                    detail: workerResponse
+                });
+                activeWorkers[workerId].terminate();
+            }
+        };
+
+
+        const postMessageToWorker = (workerId, message) => {
+            activeWorkers[workerId].postMessage(message);
+        }
+
+
+        const postMessageToParentLWC = (data) => {
+            window.parent.postMessage(data, '*');
+        }
+
+
+        const throwError = (workerId, errorObject) => {
+            postMessageToParentLWC({
+                workerId: workerId,
+                success: false,
+                detail: errorObject,
+            });
+        }
+
+
+        const handleMessageFromLWC = (data) => {
+            const workerId = data.workerId || Date.now();
+            execute_dynamicJS(
+                workerId,
+                data.code,
+                data.methodToCall,
+                data.methodParams,
+            );
+        }
+
+
+        // Receive Messages from Parent LWC
+        window.addEventListener('message', (event) => {
+            handleMessageFromLWC(event.data);
+        });
+
+    </script>
+</apex:page>
