@@ -1,89 +1,85 @@
-/**
- * MIT License
- * Copyright (c) 2022 Andrew Hovey
- * Full License Text: https://ahovey.com/MITLicense.html
- * The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
- * -----------------------------------------------------
- */
- 
- ==============================
- USAGE:
+# WebWorker Utility
 
-1. Ensure that there is at least one instance of <c-web-worker> rendered on the page (only one is required).
+## Usage Instructions
+
+1. Ensure that there is at least one instance of `<c-web-worker>` rendered on the page (only one is required).
 
 2. In JS files where you wish to perform a JS task in a separate processing thread:
 
-(a) Import the WebWorker class:
+   - Import the WebWorker class:
 
-    import WebWorker from 'c/webWorker'; // Don't forget to import WebWorker
+         `import WebWorker from 'c/webWorker';`
 
 
-(b) Call the async method WebWorker.makeRequestToWebWorker()
+   - Call the async method `WebWorker.makeRequestToWebWorker()`
 
-    /** EXAMPLE WITH PARAMETERS **/
+        #### Example With Parameters
+        ```
+        let sampleCodeWithParams = `
+            importScripts('https://unpkg.com/@turf/turf@6/turf.min.js');
 
-    try {
-        let response = await WebWorker.makeRequestToWebWorker({
-            code: this.sampleCodeWithParams,
-            methodToCall: 'execute'; // optional
-            methodParams: [4]; // optional
-        });
-        console.log('RESPONSE ', response);
-    } catch (err) {
-        console.error('ERROR making request ', err);
-    }
-
-    this.sampleCodeWithParams = `
-        importScripts('https://unpkg.com/@turf/turf@6/turf.min.js');
-
-        let factorial = (input) => {
-            if (!Number.isInteger(input) || input < 1) {
-                throw ('You must provide a positive integer. Your input: ' + input);
+            let factorial = (input) => {
+                if (!Number.isInteger(input) || input < 1) {
+                    throw ('You must provide a positive integer. Your input: ' + input);
+                }
+                let product = input--;
+                for (let current = input; current > 0; current--) {
+                    product *= current;
+                }
+                return product;
             }
-            let product = input--;
-            for (let current = input; current > 0; current--) {
-                product *= current;
+
+            // Notice that execute must be called,
+            // it will not happen automatically when the code loads
+            let execute = (num) => {
+                let result = factorial(num);
+                postMessage(result);
             }
-            return product;
-        }
+        `;
         
-        let execute = (num) => {
+        try {
+            let response = await WebWorker.makeRequestToWebWorker({
+                code: sampleCodeWithParams,
+                methodToCall: 'execute'; // optional
+                methodParams: [4]; // optional
+            });
+            console.log('RESPONSE ', response);
+        } catch (err) {
+            console.error('ERROR making request ', err);
+        }
+        ```
+
+        #### Example Without Parameters
+        ```
+        sampleCodeWithoutParams = `
+            let factorial = (input) => {
+                if (!Number.isInteger(input) || input < 1) {
+                    throw ('You must provide a positive integer. Your input: ' + input);
+                }
+                let product = input--;
+                for (let current = input; current > 0; current--) {
+                    product *= current;
+                }
+                return product;
+            }
+
+            // Notice that the following commands are not inside a function.
+            // These will run when the code first loads:
+            let num = 5;
             let result = factorial(num);
             postMessage(result);
+        `;
+        
+        try {
+            let response = await WebWorker.makeRequestToWebWorker({
+                code: sampleCodeWithoutParams
+            });
+            console.log('RESPONSE ', response);
+        } catch (err) {
+            console.error('ERROR making request ', err);
         }
-    `;
+        ```
 
-
-
-    /** EXAMPLE WITHOUT PARAMETERS **/
-
-    try {
-        let response = await WebWorker.makeRequestToWebWorker({
-            code: this.sampleCodeWithoutParams
-        });
-        console.log('RESPONSE ', response);
-    } catch (err) {
-        console.error('ERROR making request ', err);
-    }
-
-    this.sampleCodeWithoutParams = `
-        let factorial = (input) => {
-            if (!Number.isInteger(input) || input < 1) {
-                throw ('You must provide a positive integer. Your input: ' + input);
-            }
-            let product = input--;
-            for (let current = input; current > 0; current--) {
-                product *= current;
-            }
-            return product;
-        }
-
-        let num = 5;
-        let result = factorial(num);
-        postMessage(result);
-    `;
-
-    
 
 NOTES:
  - In your code, return a value returnValue by calling "postMessage(returnValue)"
