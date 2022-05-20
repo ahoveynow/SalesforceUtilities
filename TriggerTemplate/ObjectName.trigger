@@ -14,7 +14,7 @@ trigger ObjectName on ObjectName (
     after delete,
     after undelete
 ) {
-    ObjectName handler = new ObjectNameTriggerHandler();
+    ObjectNameTriggerHandler handler = new ObjectNameTriggerHandler();
 
     switch on Trigger.operationType {
 
