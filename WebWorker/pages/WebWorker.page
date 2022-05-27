@@ -9,110 +9,388 @@
 
 <apex:page>
     <script>
+        const LWC_MESSAGE_REF = 'LWC_WEB_WORKER';
+        const WORKER_LOADED_MESSAGE = 'WEB WORKER LOADED';
 
-        let activeWorkers = {};
+        const ACTIONS = {
+            CREATE_DYNAMIC: 'CREATE_DYNAMIC',
+            CREATE_URL: 'CREATE_URL',
+            GET_IS_ACTIVE: 'GET_IS_ACTIVE',
+            RUN_METHOD: 'RUN_METHOD',
+            TERMINATE: 'TERMINATE',
+        };
 
-        /************************************/
-        /* DIFFERENT WAYS TO RUN JAVASCRIPT */
 
-        /* OPTION 1: Dynamic Javascript */
-        const create_dynamicJS = (workerId, code = '') => {
+        const ErrorWrapper = class {
+            message;
+            stack;
+            fileName;
+
+            constructor(message = '', stack, fileName) {
+                this.message = message;
+                this.stack = stack;
+                this.fileName = fileName;
+            }
+        };
+
+
+        const WorkerWrapper = class {
+            workerId;
+            worker;
+            keepAlive;
+            isAlive = false;
+            runningRequestId;
+            loaded = false;
+
+
+            /**
+             * Creates a new Web Worker, and call
+             */
+            static createWorker = async (workerId, codeUrl, requestId, keepAlive = false) => {
+                let workerWrapper = new WorkerWrapper();
+                workerWrapper.workerId = workerId;
+                workerWrapper.keepAlive = keepAlive;
+                workerWrapper.isAlive = true;
+                workerWrapper.runningRequestId = requestId;
+
+                let existingWrapperWithSameWorkerId = workers[workerId];
+                if (existingWrapperWithSameWorkerId) {
+                    existingWrapperWithSameWorkerId.terminate();
+                }
+
+                workers[workerId] = workerWrapper;
+
+                // This initializes the JS Code
+                workerWrapper.worker = new Worker(codeUrl);
+
+                // To track when the initial load and run of non-method code completes
+                let resolveLoad;
+                let rejectLoad;
+                let loadPromise = new Promise((resolve, reject) => {
+                    resolveLoad = resolve;
+                    rejectLoad = reject;
+                });
+
+                // MESSAGE HANDLER
+                workerWrapper.worker.onmessage = (workerEvent) => {
+                    let workerResponse = workerEvent.data;
+                    if (workerResponse === WORKER_LOADED_MESSAGE) {
+                        workerWrapper.loaded = true;
+                        resolveLoad();
+                        if (!requestId) { return; } // if requestId is not provided, a method call will immediately follow
+                    }
+
+                    sendSuccess(workerWrapper.workerId, workerResponse, workerWrapper.runningRequestId);
+
+                    workerWrapper.runningRequestId = undefined; // Clear runningRequestId
+            
+                    // Terminate worker if necessary
+                    if (!workerWrapper.keepAlive) {
+                        workerWrapper.terminate();
+                    }
+                };
+
+
+                // UNHANDLED EXCEPTION HANDLER
+                workerWrapper.worker.onerror = (err) => {
+                    let errorWrapper = new ErrorWrapper(
+                        err.message,
+                        `Line: ${err.lineno}, Col: ${err.colno}`,
+                        'Inline Content',
+                    );
+
+                    if (workerWrapper.loaded === false) {
+                        rejectLoad(errorWrapper);
+                        if (!requestId) { return; }
+                    }
+                    
+                    sendError(
+                        workerWrapper.workerId,
+                        errorWrapper,
+                        workerWrapper.runningRequestId,
+                    );
+
+                    workerWrapper.runningRequestId = undefined; // Clear runningRequestId
+
+                    // Terminate worker if necessary
+                    if (!workerWrapper.keepAlive) {
+                        workerWrapper.terminate();
+                    }
+                };
+
+                return loadPromise; // Resolves or rejects when code loads and runs for first time
+            }
+
+
+            callMethod = (requestId, methodToCall = '', params = []) => {
+                if (!this.isAlive) {
+                    sendError(this.workerId, new ErrorWrapper('Worker is not active.'), requestId);
+                    return;
+                }
+                if (!methodToCall) {
+                    sendError(this.workerId, new ErrorWrapper('No method name was provided.'), requestId);
+                    return;
+                }
+                
+                // this.requestId is set in postMessageToWorker
+                this.postMessageToWorker(
+                    requestId,
+                    {
+                        methodToCall: methodToCall,
+                        params: params,
+                    }
+                );
+            }
+
+
+            getIsAlive = () => {
+                return this.isAlive === true;
+            }
+
+
+            postMessageToWorker = (requestId, message) => {
+                if (!this.isAlive) {
+                    sendError(this.workerId, new ErrorWrapper('Worker is not active.'), requestId);
+                    return;
+                }
+
+                if (this.runningRequestId) {
+                    sendError(
+                        this.workerId, 
+                        new ErrorWrapper('This request was replaced by another. Please only send one request at a time. The next response you receive may be the response for this request unless this request had no return message.'), 
+                        this.runningRequestId
+                    );
+                }
+
+                this.runningRequestId = requestId;
+                this.worker.postMessage(message);
+            }
+
+
+            terminate = (terminateRequestId) => {
+                if (!this.isAlive) {
+                    if (terminateRequestId) {
+                        sendSuccess(
+                            this.workerId,
+                            'This worker was already terminated previously, or was never successfully initiated.',
+                            terminateRequestId,
+                        );
+                    }
+                    return;
+                }
+
+                this.worker.terminate();
+                this.isAlive = false;
+
+                if (this.runningRequestId) {
+                    sendError(
+                        this.workerId,
+                        new ErrorWrapper('This worker was terminated by request.'),
+                        this.runningRequestId,
+                    );
+                    this.runningRequestId = undefined;
+                }
+            }
+        };
+
+
+        /**
+         * Keys are workerIds, values are instances of WorkerWrapper
+         */
+        let workers = {};
+
+
+        const createWorker = async (workerId, requestId, codeUrl, keepAlive = false, methodToCall, methodParams = []) => {
+            await WorkerWrapper.createWorker(
+                workerId, 
+                codeUrl, 
+                methodToCall ? undefined: requestId, // send request with method call if there is one
+                keepAlive
+            );
+
+            if (methodToCall) {
+                workers[workerId].callMethod(requestId, methodToCall, methodParams);
+            }
+        };
+
+        
+        const execute_dynamicJS = async (workerId, requestId, code, methodToCall, methodParams = [], keepAlive = false) => {
+            /* Add code to what was provided by the user:
+                - getBaseUrl(): Allows user's code to access relative resources, eg. importScripts(getBaseUrl() + '/resource/maplibs/turf.min.js');
+                - event listener to call a function
+                - Posts a message when the code is loaded (this is on the last line, which is how we know the code has fully loaded)
+            */
+            code = `const getBaseUrl = () => { return new URL('${document.location}').origin; }; \n`
+                    + code
+                    +  `
+                addEventListener('message', (executeEvent) => {
+                    let methodToCall = executeEvent.data.methodToCall;
+                    if (!methodToCall) { return; }
+                    let params = executeEvent.data.params || [];
+                    let namedFunction = eval(methodToCall);
+                    namedFunction(...params);
+                });
+                postMessage('${WORKER_LOADED_MESSAGE}'); // sends message to complete request after code is loaded
+            `;
+
             let blob = new Blob(
                 [code],
                 { type: "text/javascript" }
             );
-
-            // This initializes the JS Code
-            let worker = new Worker(window.URL.createObjectURL(blob));
-            worker.onerror = (err) => {
-                throwError(workerId, {
-                    message: err.message,
-                    stack: `Line: ${err.lineno}, Col: ${err.colno}`,
-                    filename: 'Inline Content',
-                });
-            };
-            worker.onmessage = getWorkerResponseHandler(workerId);
-            activeWorkers[workerId] = worker;
-        };
-
-
-        const execute_dynamicJS = (workerId, code, methodToCall, methodParams) => {
-            // Add code to call a function in the provided code
-            if (methodToCall) {
-                code += `
-                    addEventListener('message', (executeEvent) => {
-                        let methodToCall = executeEvent.data.methodToCall;
-                        if (!methodToCall) { return; }
-                        let params = executeEvent.data.params || [];
-                        let namedFunction = eval(methodToCall);
-                        namedFunction(...params);
-                    });
-                `;
-            }
             
-            create_dynamicJS(workerId, code);
-            postMessageToWorker(
+            await createWorker(
                 workerId,
+                requestId,
+                window.URL.createObjectURL(blob),
+                keepAlive,
+                methodToCall,
+                methodParams,
+            );
+        }
+
+        
+        const execute_staticJS = async (workerId, requestId, codeUrl, methodToCall, methodParams = [], keepAlive = false) => {
+            let code = await fetch(codeUrl).then(response => response.text());
+            
+            await execute_dynamicJS(
+                workerId,
+                requestId,
+                code,
+                keepAlive,
+                methodToCall,
+                methodParams,
+            );
+        }
+
+
+        // Don't call directly -- call via sendError and sendSuccess
+        const postMessageToParentLWC = (workerId, success, detail, requestId) => {
+            window.parent.postMessage(
                 {
-                    methodToCall: methodToCall,
-                    params: methodParams,
-                }
-            );
-        }
-
-
-
-        /* OPTION 2: Imported from File */
-        // TO-DO
-
-        /************************************/
-
-    
-        const getWorkerResponseHandler = (workerId) => {
-            return (workerEvent) => {
-                let workerResponse = workerEvent.data;
-                postMessageToParentLWC({
                     workerId: workerId,
-                    success: true,
-                    detail: workerResponse
-                });
-                activeWorkers[workerId].terminate();
-            }
-        };
-
-
-        const postMessageToWorker = (workerId, message) => {
-            activeWorkers[workerId].postMessage(message);
-        }
-
-
-        const postMessageToParentLWC = (data) => {
-            window.parent.postMessage(data, '*');
-        }
-
-
-        const throwError = (workerId, errorObject) => {
-            postMessageToParentLWC({
-                workerId: workerId,
-                success: false,
-                detail: errorObject,
-            });
-        }
-
-
-        const handleMessageFromLWC = (data) => {
-            const workerId = data.workerId || Date.now();
-            execute_dynamicJS(
-                workerId,
-                data.code,
-                data.methodToCall,
-                data.methodParams,
+                    success: success,
+                    detail: detail,
+                    requestId: requestId,
+                    messageRef: LWC_MESSAGE_REF,
+                }, 
+                '*'
             );
+        }
+
+
+        /**
+         * @param {ErrorWrapper} errorWrapper
+         */
+        const sendError = (workerId, errorWrapper, requestId) => {
+            postMessageToParentLWC(workerId, false /* success */, errorWrapper, requestId);
+        }
+
+
+        const sendSuccess = (workerId, successDetail, requestId) => {
+            postMessageToParentLWC(workerId, true /* success */, successDetail, requestId);
+        }
+
+
+        const handleMessageFromLWC = async (data) => {
+            const workerId = data.workerId || Date.now();
+            const action = data.action;
+            const requestId = data.requestId;
+            
+            if (action === ACTIONS.CREATE_DYNAMIC) {
+                try {
+                    const keepAlive = data.keepAlive || false;
+                    await execute_dynamicJS(
+                        workerId,
+                        requestId,
+                        data.code,
+                        data.methodToCall,
+                        data.methodParams,
+                        keepAlive
+                    );
+                } catch (err) {
+                    sendError(
+                        workerId,
+                        new ErrorWrapper(err.message, err.stack),
+                        requestId
+                    );
+                }
+                return;
+            }
+
+
+            if (action === ACTIONS.CREATE_URL) {
+                try {
+                    const keepAlive = data.keepAlive || false;
+                    await execute_staticJS(
+                        workerId,
+                        requestId,
+                        data.codeUrl,
+                        data.methodToCall,
+                        data.methodParams,
+                        keepAlive
+                    );
+                } catch (err) {
+                    sendError(
+                        workerId,
+                        new ErrorWrapper(err.message, err.stack),
+                        requestId
+                    );
+                }
+                return;
+            }
+
+
+            if (action === ACTIONS.GET_IS_ACTIVE) {
+                try {
+                    const worker = workers[workerId];
+                    if (!worker) {
+                        sendSuccess(workerId, false, requestId);
+                    }
+                    sendSuccess(workerId, worker.getIsAlive(), requestId);
+                } catch (err) {
+                    sendError(
+                        workerId,
+                        new ErrorWrapper(err.message, err.stack),
+                        requestId
+                    );
+                }
+                return;
+            }
+
+
+            if (action === ACTIONS.RUN_METHOD) {
+                try {
+                    workers[workerId].callMethod(requestId, data.methodToCall, data.methodParams);
+                } catch (err) {
+                    sendError(
+                        workerId,
+                        new ErrorWrapper(err.message, err.stack),
+                        requestId
+                    );
+                }
+                return;
+            }
+
+
+            if (action === ACTIONS.TERMINATE) {
+                try {
+                    workers[workerId].terminate(requestId);
+                    sendSuccess(workerId, undefined, requestId);
+                } catch (err) {
+                    sendError(
+                        workerId,
+                        new ErrorWrapper(err.message, err.stack),
+                        requestId
+                    );
+                }
+                return;
+            }
         }
 
 
         // Receive Messages from Parent LWC
         window.addEventListener('message', (event) => {
+            if (event.data?.messageRef !== LWC_MESSAGE_REF) { return; } // Ignore anything not from the LWC WebWorker component
             handleMessageFromLWC(event.data);
         });
 

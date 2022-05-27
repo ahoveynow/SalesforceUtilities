@@ -8,7 +8,7 @@
 -->
 
 <template>
-    <div class="slds-hide">
+    <div if:true={isActive} class="slds-hide">
         <iframe src={visualforcePageUrl} data-id="iframeDiv"></iframe>
     </div>
 </template>
