@@ -12,6 +12,11 @@
         const LWC_MESSAGE_REF = 'LWC_WEB_WORKER';
         const WORKER_LOADED_MESSAGE = 'WEB WORKER LOADED';
 
+        // These variables are set to securely send and receive messages only between intended domains
+        const PAGE_URL = '{!$CurrentPage.URL}';
+        const URL_SUBDOMAIN_PREFIX = PAGE_URL.substring(0, PAGE_URL.indexOf('--'));
+        let returnTarget;
+
         const ACTIONS = {
             CREATE_DYNAMIC: 'CREATE_DYNAMIC',
             CREATE_URL: 'CREATE_URL',
@@ -273,7 +278,7 @@
                     requestId: requestId,
                     messageRef: LWC_MESSAGE_REF,
                 }, 
-                '*'
+                returnTarget,
             );
         }
 
@@ -295,6 +300,7 @@
             const workerId = data.workerId || Date.now();
             const action = data.action;
             const requestId = data.requestId;
+            if (!returnTarget) { returnTarget = data.returnTarget; }
             
             if (action === ACTIONS.CREATE_DYNAMIC) {
                 try {
@@ -390,6 +396,7 @@
 
         // Receive Messages from Parent LWC
         window.addEventListener('message', (event) => {
+            if (event.origin.startsWith(URL_SUBDOMAIN_PREFIX) === false) { return; } // Ignore anything not from same salesforce org
             if (event.data?.messageRef !== LWC_MESSAGE_REF) { return; } // Ignore anything not from the LWC WebWorker component
             handleMessageFromLWC(event.data);
         });

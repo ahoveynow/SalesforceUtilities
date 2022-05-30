@@ -9,7 +9,6 @@
 
 /**
  * REMAINING TO-DO ITEMS:
- * - Figure out security for second parameter of postMessage
  * - Determine if adding multiple instances of <c-web-worker> will try to handle responses multiple times
  * - Solve situation where if the singleton instance is destroyed, another instance can take its place (for new workers... any on the destroyed instance will gone)
  * - Add JSDoc comments
@@ -21,6 +20,15 @@
  const LWC_MESSAGE_REF = 'LWC_WEB_WORKER';
  const TIMED_OUT_MESSAGE = 'Request timed out';
  const VISUALFORCE_PAGE_NAME = 'WebWorker';
+ 
+ // These variables are set to securely send and receive messages only between intended domains
+ const host = document.location.host;
+ const sfRootUrl = `${document.location.protocol}//${host.substring(0, host.indexOf('.'))}`;
+ const visualforceTargets = [
+     sfRootUrl + '--c.visualforce.com',
+     sfRootUrl + '--c.vf.force.com',
+     sfRootUrl + '--c.InstanceName.visual.force.com',
+ ];
  
  const ACTIONS = {
      CREATE_DYNAMIC: 'CREATE_DYNAMIC',
@@ -69,8 +77,14 @@
          // messageRef is checked both in this component and the Visualforce page so that unrelated page messages are ignored
          data.messageRef = LWC_MESSAGE_REF;
  
-         // Send request to worker
-         WebWorker.singleton.iframeElement.contentWindow.postMessage(data, '*');
+         // Set the returnTarget so visualforce page can securely send response message
+         data.returnTarget = `${document.location.protocol}//${host}`;
+ 
+         // Send request to worker -- There are multiple forms of visualforce URLs depending on org configuration,
+         // so we must send the message to each of them (only one will actually exist and receive the request)
+         for (const vfTarget of visualforceTargets) {
+             WebWorker.singleton.iframeElement.contentWindow.postMessage(data, vfTarget);
+         }
  
          // Store resolve and reject so that we can call one when we receive a message from the VFP later on
          let resolution = new Promise((resolve, reject) => {
@@ -334,6 +348,8 @@
       * @private
       */
      handleResponseFromVFP = async (webWorkerMessageEvent) => {
+         if (visualforceTargets.includes(webWorkerMessageEvent.origin) === false) { return; } // Ignore anything not from a visualforce page in this salesforce org
+ 
          if (webWorkerMessageEvent?.data?.messageRef !== LWC_MESSAGE_REF) { return; } // Ignore anything not from the WebWorker Visualforce Page
          let response = { ...webWorkerMessageEvent.data };
  
