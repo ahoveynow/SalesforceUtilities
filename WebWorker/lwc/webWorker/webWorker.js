@@ -3,19 +3,15 @@
  * Copyright (c) 2022 Andrew Hovey
  * Full License Text: https://ahovey.com/MITLicense.html
  * The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
- * -----------------------------------------------------
- * NOTICE: THIS IS A WORK IN PROGRESS
  */
 
 /**
  * REMAINING TO-DO ITEMS:
- * - Determine if adding multiple instances of <c-web-worker> will try to handle responses multiple times
- * - Solve situation where if the singleton instance is destroyed, another instance can take its place (for new workers... any on the destroyed instance will gone)
  * - Add JSDoc comments
  * - Complete usage documentation (README)
  */
 
- import { LightningElement } from 'lwc';
+ import { LightningElement, api } from 'lwc';
 
  const LWC_MESSAGE_REF = 'LWC_WEB_WORKER';
  const TIMED_OUT_MESSAGE = 'Request timed out';
@@ -146,25 +142,56 @@
  
      static singleton;
      static workers = {}; // Values are instances of WorkerWrapper
+     static webWorkerComponentInstances = [];
  
      visualforcePageUrl = `/apex/${VISUALFORCE_PAGE_NAME}`;
      iframeElement;
-     isActive = false; // Need to improve
+     isActive = false; // Only one WebWorker component is active at any time.
+     isAlive = true; // Set to false during disconnectedCallback to indicate the component has been deleted
+ 
  
      connectedCallback() {
-         // TO-DO: NEED TO CHECK IF THIS LINE BELOW IS GOING TO CAUSE DUPLICATE HANDLING IF COMPONENT IS ADDED IN MULTIPLE PLACES:
-         window.addEventListener('message', this.handleResponseFromVFP);
+         WebWorker.webWorkerComponentInstances.push(this);
          if (!WebWorker.singleton) {
-             WebWorker.singleton = this;
-             this.isActive = true;
-         } else {
+             this.activateInstance();
+         }
+     }
  
+ 
+     disconnectedCallback() {
+         this.isAlive = false;
+ 
+         if (this.isActive) {
+             console.error('Active WebWorker component instance has been deleted. Any active web workers have been deleted with it.');
+             window.removeEventListener('message', this.handleResponseFromVFP);
+             WebWorker.workers = {};
+             WebWorker.singleton = undefined;
+             WebWorker.activateLWCInstanceIfAvailable(); // async
          }
      }
  
  
      renderedCallback() {
-         this.iframeElement = this.template.querySelector('[data-id=iframeDiv');
+         this.iframeElement = this.template.querySelector('[data-id=iframeDiv]');
+     }
+ 
+ 
+     activateInstance = () => {
+         WebWorker.singleton = this;
+         this.isActive = true;
+         window.addEventListener('message', this.handleResponseFromVFP);
+     }
+ 
+ 
+     static activateLWCInstanceIfAvailable = async () => {
+         setTimeout(() => {
+             WebWorker.webWorkerComponentInstances = WebWorker.webWorkerComponentInstances.filter(instance => instance.isAlive);
+             if (WebWorker.webWorkerComponentInstances.length > 0) {
+                 WebWorker.webWorkerComponentInstances[0].activateInstance();
+             } else {
+                 console.log('There are no instances of WebWorker remaining to process requests.');
+             }
+         }, 100);
      }
  
  
