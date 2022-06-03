@@ -259,9 +259,9 @@
                 workerId,
                 requestId,
                 code,
-                keepAlive,
                 methodToCall,
                 methodParams,
+                keepAlive,
             );
         }
 
