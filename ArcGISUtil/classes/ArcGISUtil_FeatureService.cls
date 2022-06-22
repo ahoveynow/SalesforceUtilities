@@ -37,7 +37,9 @@ public inherited sharing class ArcGISUtil_FeatureService {
         request.setBodyAsBlob(formData);
         request.setTimeout(timeout);
         for (String headerKey: additionalRequestHeaders.keySet()) {
-            request.setHeader(headerKey, additionalRequestHeaders.get(headerKey));
+	    	if (additionalRequestHeaders.get(headerKey) != null) {
+            	request.setHeader(headerKey, additionalRequestHeaders.get(headerKey));
+			}
         }
 
         HttpResponse response = new Http().send(request);
@@ -121,7 +123,9 @@ public inherited sharing class ArcGISUtil_FeatureService {
         request.setBodyAsBlob(formData);
         request.setTimeout(timeout);
         for (String headerKey: additionalRequestHeaders.keySet()) {
-            request.setHeader(headerKey, additionalRequestHeaders.get(headerKey));
+			if (additionalRequestHeaders.get(headerKey) != null) {
+            	request.setHeader(headerKey, additionalRequestHeaders.get(headerKey));
+			}
         }
 
         HttpResponse response = new Http().send(request);
