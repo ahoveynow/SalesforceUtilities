@@ -7,6 +7,6 @@
 
 <template>
     <div if:true={isActive} class="slds-hide">
-        <iframe src={visualforcePageUrl} data-id="iframeDiv"></iframe>
+        <iframe if:true={visualforcePageUrl} src={visualforcePageUrl} data-id="iframeDiv"></iframe>
     </div>
 </template>

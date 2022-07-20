@@ -11,11 +11,11 @@
  * - Complete usage documentation (README)
  */
 
-import { LightningElement, api } from 'lwc';
+import { LightningElement } from 'lwc';
+import getCSRFProtectedVFPUrl from '@salesforce/apex/WebWorker.getCSRFProtectedVFPUrl';
 
 const LWC_MESSAGE_REF = 'LWC_WEB_WORKER';
 const TIMED_OUT_MESSAGE = 'Request timed out';
-const VISUALFORCE_PAGE_NAME = 'WebWorker';
 
 // These variables are set to securely send and receive messages only between intended domains
 const host = document.location.host;
@@ -144,13 +144,18 @@ export default class WebWorker extends LightningElement {
     static workers = {}; // Values are instances of WorkerWrapper
     static webWorkerComponentInstances = [];
 
-    visualforcePageUrl = `/apex/${VISUALFORCE_PAGE_NAME}`;
+    visualforcePageUrl;
     iframeElement;
     isActive = false; // Only one WebWorker component is active at any time.
     isAlive = true; // Set to false during disconnectedCallback to indicate the component has been deleted
 
 
+    /***************************/
+    /***** LIFECYCLE HOOKS *****/
+    /***************************/
+
     connectedCallback() {
+        this.fetchVisualforcePageUrl();
         WebWorker.webWorkerComponentInstances.push(this);
         if (!WebWorker.singleton) {
             this.activateInstance();
@@ -172,28 +177,17 @@ export default class WebWorker extends LightningElement {
 
 
     renderedCallback() {
-        this.iframeElement = this.template.querySelector('[data-id=iframeDiv]');
+        if (!this.iframeElement) {
+            this.iframeElement = this.template.querySelector('[data-id=iframeDiv]');
+        }
     }
 
 
-    activateInstance = () => {
-        WebWorker.singleton = this;
-        this.isActive = true;
-        window.addEventListener('message', this.handleResponseFromVFP);
-    }
+    
 
-
-    static activateLWCInstanceIfAvailable = async () => {
-        setTimeout(() => {
-            WebWorker.webWorkerComponentInstances = WebWorker.webWorkerComponentInstances.filter(instance => instance.isAlive);
-            if (WebWorker.webWorkerComponentInstances.length > 0) {
-                WebWorker.webWorkerComponentInstances[0].activateInstance();
-            } else {
-                console.log('There are no instances of WebWorker remaining to process requests.');
-            }
-        }, 100);
-    }
-
+    /**************************/
+    /***** PUBLIC METHODS *****/
+    /**************************/
 
     /**
      * 
@@ -366,7 +360,49 @@ export default class WebWorker extends LightningElement {
         workerWrapper.makeRequest(dataPayload, timeoutInSeconds);
     }
  
- 
+
+
+
+    /***************************/
+    /***** PRIVATE METHODS *****/
+    /***************************/
+
+    /**
+     * If the active WebWorker LWC instance is destroyed, attempts to activate any other instance that has been loaded into the DOM.
+     * @private
+     */
+    static activateLWCInstanceIfAvailable = async () => {
+        setTimeout(() => {
+            WebWorker.webWorkerComponentInstances = WebWorker.webWorkerComponentInstances.filter(instance => instance.isAlive);
+            if (WebWorker.webWorkerComponentInstances.length > 0) {
+                WebWorker.webWorkerComponentInstances[0].activateInstance();
+            } else {
+                console.log('There are no instances of WebWorker remaining to process requests.');
+            }
+        }, 100);
+    }
+
+
+    /**
+     * Renders iframe and adds event listeners for WebWorker responses.
+     * @private
+     */
+    activateInstance = () => {
+        WebWorker.singleton = this;
+        this.isActive = true;
+        window.addEventListener('message', this.handleResponseFromVFP);
+    }
+
+
+    /**
+     * Gets the URL for the WebWorker Visualforce Page, that contains the CONFIRMATIONTOKEN required for CSRF Protections
+     * @private
+     */
+    fetchVisualforcePageUrl = async() => {
+        this.visualforcePageUrl = await getCSRFProtectedVFPUrl();
+    }
+
+
     /**
      * 
      * @param {Object} webWorkerMessageEvent 
