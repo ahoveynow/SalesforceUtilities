@@ -100,19 +100,20 @@ const customConcurrencyLimit = () => {
 /**
  * Enqueue methods with a timeout.
  * In this scenario, there are 11 methods that are enqueued.
- * If any of them wait longer than 5 seconds to be started, an error will be thrown for that method.
+ * If any of them wait longer than 7 seconds to complete, an error will be thrown for that method.
  * 
- * Since the first 10 take 7 seconds to run, the 11th must timeout.
+ * Since the first 10 take 5 seconds to run, the 11th must timeout because it will not complete until around 10 seconds.
+ * Note that an error will be thrown, but the executing function will continue to run if it has already started.
  */
 const enqueueWithTimeout = () => {
 
     for (let index = 0; index < 11; index++) {
         AsyncThrottler.enqueue(
             async () => {
-                await sleep(7000); // wait 7 seconds
+                await sleep(5000); // wait 5 seconds
             },
             'My Throttler',
-            5000
+            7000 // timout after 7 seconds
         ).catch(err => {
             console.log('Index 10 should have failed: ' + index);
             console.log('Error Message: ', err);
