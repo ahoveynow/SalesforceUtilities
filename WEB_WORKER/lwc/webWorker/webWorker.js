@@ -7,6 +7,8 @@
 
 /**
  * REMAINING TO-DO ITEMS:
+ * - Move all non-public methods to a helper file
+ * - Determine which visualforce target is correct once and then only call that one (unless it fails, then repeat)
  * - Add JSDoc comments
  * - Complete usage documentation (README)
  */
