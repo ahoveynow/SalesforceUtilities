@@ -7,8 +7,8 @@
 
 import { sleep } from 'c/utilities';
 
+const DEFAULT_CONCURRENT_LIMIT = 10;
 const TIMED_OUT_MESSAGE = 'Request timed out';
-
 
 class EnqueuedFunction {
 
@@ -47,14 +47,15 @@ export class AsyncThrottler {
     static throttlers = {};
 
     currentlyRunning = 0;
-    maxLimit = 10;
+    concurrentRunningLimit;
     queue = [];
     queueMap = {};
     throttlerName;
 
 
-    constructor (throttlerName = '') {
+    constructor (throttlerName = '', concurrentRunningLimit = DEFAULT_CONCURRENT_LIMIT) {
         this.throttlerName = throttlerName;
+        this.concurrentRunningLimit = concurrentRunningLimit;
         AsyncThrottler.throttlers[throttlerName] = this;
     }
 
@@ -128,12 +129,17 @@ export class AsyncThrottler {
 
 
     dequeueNextIfPossible = async () => {
-        if (this.currentlyRunning >= this.maxLimit) { return; }
+
+        if (this.currentlyRunning >= this.concurrentRunningLimit) { return; } // Don't do anything if we're already at capacity
+        if (this.queue.length === 0) { return; } // If the queue is empty we're all done.
+
+        // Execute Next
         let next = this.queue.shift();
-        if (!next) { return; }
         let uniqueId = next.uniqueId;
         this.currentlyRunning++;
         await next.execute();
+
+        // Post-execute
         this.currentlyRunning--;
         delete this.queueMap[uniqueId];
         this.dequeueNextIfPossible();
