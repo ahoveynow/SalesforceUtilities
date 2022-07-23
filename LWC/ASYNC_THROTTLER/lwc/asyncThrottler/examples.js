@@ -40,7 +40,7 @@ const simulateApiCall = async (anyParam) => {
  * Call must take place inside an anonymous function because you don't want the method to be called immediately.
  * Placing it in the anonymous function allows the Async Throttler to execute the method at the appropriate time.
  */
-const enqueueWithParameters = async () => {
+export const enqueueWithParameters = async () => {
     let TEST_VALUE = 42;
     let result = await AsyncThrottler.enqueue(
         () => { return simulateApiCall(TEST_VALUE); }
@@ -54,7 +54,7 @@ const enqueueWithParameters = async () => {
  * Enqueues a function without parameters.
  * Note how it can be passed in without being inside an anonymous function.
  */
-const enqueueWithoutParameters = () => {
+export const enqueueWithoutParameters = () => {
     AsyncThrottler.enqueue(simulateApiCall);
 }
 
@@ -62,7 +62,7 @@ const enqueueWithoutParameters = () => {
 /**
  * Enqueues an anonymous function.
  */
-const enqueueWithAnonymousFunction = async () => {
+export const enqueueWithAnonymousFunction = async () => {
     let result = await AsyncThrottler.enqueue(
         async () => {
             await sleep(3000);
@@ -79,7 +79,7 @@ const enqueueWithAnonymousFunction = async () => {
  * Creates a custom throttler with 15 concurrent slots.
  * 100 API calls are requested at once.
  */
-const customConcurrencyLimit = () => {
+export const customConcurrencyLimit = () => {
 
     const throttlerName = 'API Calls';
     const concurrencyLimit = 15;
@@ -105,7 +105,7 @@ const customConcurrencyLimit = () => {
  * Since the first 10 take 5 seconds to run, the 11th must timeout because it will not complete until around 10 seconds.
  * Note that an error will be thrown, but the executing function will continue to run if it has already started.
  */
-const enqueueWithTimeout = () => {
+export const enqueueWithTimeout = () => {
 
     for (let index = 0; index < 11; index++) {
         AsyncThrottler.enqueue(
@@ -126,7 +126,7 @@ const enqueueWithTimeout = () => {
  * Enqueues 100 methods and stores the resulting promises in an array.
  * Awaits Promise.all to perform some action once all the calls have finished.
  */
-const waitForAllToComplete = async () => {
+export const waitForAllToComplete = async () => {
 
     let apiPromises = [];
     // Simulate 100 API calls requested at once:
