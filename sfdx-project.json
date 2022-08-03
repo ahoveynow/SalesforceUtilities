@@ -1,0 +1,12 @@
+{
+  "packageDirectories": [
+    {
+      "path": "",
+      "default": true
+    }
+  ],
+  "name": "Andrew Hovey's Salesforce Utilities",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "54.0"
+}
