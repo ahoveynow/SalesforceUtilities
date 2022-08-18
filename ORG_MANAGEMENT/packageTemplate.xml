@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
  
-	<!-- APEX CLASSES -->
+	<!-- APEX CLASSES (sfdx folder: classes) -->
 	<types>
 		<name>ApexClass</name>
 		<!-- Example: <members>ApexClassName</members> -->
@@ -9,7 +9,7 @@
 	</types>
 
 
-	<!-- APEX PAGE / VISUALFORCE PAGE -->
+	<!-- APEX PAGE / VISUALFORCE PAGE (sfdx folder: pages) -->
 	<types>
 		<name>ApexPage</name>
 		<!-- Example: <members>VisualforcePageName</members> -->
@@ -17,7 +17,7 @@
 	</types>
 
 
-	<!-- APEX TRIGGERS -->
+	<!-- APEX TRIGGERS (sfdx folder: triggers) -->
 	<types>
 		<name>ApexTrigger</name>
 		<!-- Example: <members>Apex_Trigger_Name</members> -->
@@ -25,7 +25,39 @@
 	</types>
 
 
-	<!-- CSP TRUSTED SITE -->
+    <!-- ASSIGNMENT RULES (sfdx folder: assignmentRules) -->
+	<types>
+		<name>AssignmentRules</name>
+		<!-- Example: <members>Case</members> OR <members>Lead</members> -->
+
+	</types>
+
+
+    <!-- LIGHTNING AURA COMPONENTS (sfdx folder: aura) -->
+	<types>
+		<name>AuraDefinitionBundle</name>
+		<!-- Example: <members>auraComponentName</members> -->
+
+	</types>
+
+
+    <!-- AUTH PROVIDER (sfdx folder: authproviders) -->
+	<types>
+		<name>AuthProvider</name>
+		<!-- Example: <members>Auth_Provider_Name</members> -->
+
+	</types>
+
+
+    <!-- CONNECTED APPLICATIONS (sfdx folder: connectedApps) -->
+	<types>
+		<name>ConnectedApp</name>
+		<!-- Example: <members>Connected_App_Name</members> -->
+        
+	</types>
+
+
+	<!-- CSP TRUSTED SITE (sfdx folder: cspTrustedSites) -->
 	<types>
 		<name>CspTrustedSite</name>
 		<!-- Example: <members>CspTrustedSiteName</members> -->
@@ -33,7 +65,15 @@
 	</types>
 
 
-	<!-- CUSTOM OBJECTS -->
+    <!-- CUSTOM APPLICATIONS (sfdx folder: applications) -->
+	<types>
+		<name>CustomApplication</name>
+		<!-- Example: <members>Custom_Application_Name</members> -->
+        
+	</types>
+
+
+	<!-- CUSTOM OBJECTS (sfdx folder: objects) -->
 	<types>
 		<name>CustomObject</name>
 		<!-- Example: <members>Custom_Object_API_Name__c</members> -->
@@ -41,7 +81,7 @@
 	</types>
 
 
-	<!-- CUSTOM FIELDS -->
+	<!-- CUSTOM FIELDS (sfdx folder: objects/[Object_API_Name__c]/fields) -->
 	<types>
 		<name>CustomField</name>
 		<!-- Example: <members>Object_API_Name__c.Custom_Field_AP_Name__c</members> -->
@@ -49,7 +89,7 @@
 	</types>
 
 
-	<!-- CUSTOM LABELS-->
+	<!-- CUSTOM LABELS (sfdx folder: labels) -->
 	<types>
 		<name>CustomLabel</name>
 		<!-- Example: <members>Custom_Label_Name</members> -->
@@ -57,7 +97,7 @@
 	</types>
 
 
-	<!-- CUSTOM METADATA RECORDS -->
+	<!-- CUSTOM METADATA RECORDS (sfdx folder: customMetadata) -->
 	<types>
 		<name>CustomMetadata</name>
 		<!-- Example: <members>CustomMetadataTypeName.CUSTOM_METADATA_RECORD_NAME</members> -->
@@ -65,7 +105,7 @@
 	</types>
 
 
-	<!-- CUSTOM TABS -->
+	<!-- CUSTOM TABS (sfdx folder: tabs) -->
 	<types>
 		<name>CustomTab</name>
 		<!-- Example: <members>Custom_Tab_Name</members> -->
@@ -74,7 +114,7 @@
 	</types>
 
 
-	<!-- FLEXIPAGES / LIGHTNING PAGES -->
+	<!-- FLEXIPAGES / LIGHTNING PAGES (sfdx folder: flexipages) -->
 	<types>
 		<name>FlexiPage</name>
 		<!-- Example: <members>FlexiPage_Name</members> -->
@@ -83,7 +123,16 @@
 	</types>
 
 
-	<!-- GLOBAL VALUE SETS -->
+	<!-- FLOW (sfdx folder: flows) -->
+	<types>
+		<name>Flow</name>
+		<!-- Example: <members>Flow_Name</members> -->
+
+		<members>Relevance_Link_Dynamic</members>
+	</types>
+
+
+	<!-- GLOBAL VALUE SETS (sfdx folder: globalValueSets) -->
 	<types>
 		<name>GlobalValueSet</name>
 		<!-- Example: <members>Global_Picklist_Name</members> -->
@@ -91,7 +140,7 @@
 	</types>
 
 
-	<!-- PAGE LAYOUTS -->
+	<!-- PAGE LAYOUTS (sfdx folder: layouts) -->
 	<types>
 		<name>Layout</name>
 		<!-- Example: <members>Object_Name__c-Page Layout Name</members> -->
@@ -99,7 +148,7 @@
 	</types>
 
 
-	<!-- LIGHTNING WEB COMPONENTS -->
+	<!-- LIGHTNING WEB COMPONENTS (sfdx folder: lwc) -->
 	<types>
 		<name>LightningComponentBundle</name>
 		<!-- Example: <members>lwcName</members> -->
@@ -107,14 +156,15 @@
 	</types>
 
 
-	<!-- LIST VIEWS -->
+	<!-- LIST VIEWS (sfdx folder: objects/[Object_API_Name__c]/listViews) -->
 	<types>
 		<name>ListView</name>
 		<!-- Example: <members>Object_API_Name__c.List_View_Name</members> -->
 
 	</types>
 
-	<!-- PERMISSION SETS -->
+
+	<!-- PERMISSION SETS (sfdx folder: permissionsets) -->
 	<types>
 		<name>PermissionSet</name>
 		<!-- Example: <members>Permission_Set_Name</members> -->
@@ -122,7 +172,7 @@
 	</types>
 
 
-	<!-- STATIC RESOURCES -->
+	<!-- STATIC RESOURCES (sfdx folder: staticresources) -->
 	<types>
 		<name>StaticResource</name>
 		<!-- Example: <members>StaticResourceName</members> -->
