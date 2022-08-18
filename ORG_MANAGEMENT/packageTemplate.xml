@@ -109,8 +109,7 @@
 	<types>
 		<name>CustomTab</name>
 		<!-- Example: <members>Custom_Tab_Name</members> -->
-
-		<members>Metadoc</members>
+		
 	</types>
 
 
@@ -119,7 +118,6 @@
 		<name>FlexiPage</name>
 		<!-- Example: <members>FlexiPage_Name</members> -->
 
-		<members>Relevance_Link_Dynamic</members>
 	</types>
 
 
@@ -128,7 +126,6 @@
 		<name>Flow</name>
 		<!-- Example: <members>Flow_Name</members> -->
 
-		<members>Relevance_Link_Dynamic</members>
 	</types>
 
 
