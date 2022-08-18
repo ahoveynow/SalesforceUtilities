@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+ 
+	<!-- APEX CLASSES -->
+	<types>
+		<name>ApexClass</name>
+		<!-- Example: <members>ApexClassName</members> -->
+
+	</types>
+
+
+	<!-- APEX PAGE / VISUALFORCE PAGE -->
+	<types>
+		<name>ApexPage</name>
+		<!-- Example: <members>VisualforcePageName</members> -->
+
+	</types>
+
+
+	<!-- APEX TRIGGERS -->
+	<types>
+		<name>ApexTrigger</name>
+		<!-- Example: <members>Apex_Trigger_Name</members> -->
+
+	</types>
+
+
+	<!-- CSP TRUSTED SITE -->
+	<types>
+		<name>CspTrustedSite</name>
+		<!-- Example: <members>CspTrustedSiteName</members> -->
+
+	</types>
+
+
+	<!-- CUSTOM OBJECTS -->
+	<types>
+		<name>CustomObject</name>
+		<!-- Example: <members>Custom_Object_API_Name__c</members> -->
+        
+	</types>
+
+
+	<!-- CUSTOM FIELDS -->
+	<types>
+		<name>CustomField</name>
+		<!-- Example: <members>Object_API_Name__c.Custom_Field_AP_Name__c</members> -->
+
+	</types>
+
+
+	<!-- CUSTOM LABELS-->
+	<types>
+		<name>CustomLabel</name>
+		<!-- Example: <members>Custom_Label_Name</members> -->
+
+	</types>
+
+
+	<!-- CUSTOM METADATA RECORDS -->
+	<types>
+		<name>CustomMetadata</name>
+		<!-- Example: <members>CustomMetadataTypeName.CUSTOM_METADATA_RECORD_NAME</members> -->
+
+	</types>
+
+
+	<!-- CUSTOM TABS -->
+	<types>
+		<name>CustomTab</name>
+		<!-- Example: <members>Custom_Tab_Name</members> -->
+
+		<members>Metadoc</members>
+	</types>
+
+
+	<!-- FLEXIPAGES / LIGHTNING PAGES -->
+	<types>
+		<name>FlexiPage</name>
+		<!-- Example: <members>FlexiPage_Name</members> -->
+
+		<members>Relevance_Link_Dynamic</members>
+	</types>
+
+
+	<!-- GLOBAL VALUE SETS -->
+	<types>
+		<name>GlobalValueSet</name>
+		<!-- Example: <members>Global_Picklist_Name</members> -->
+
+	</types>
+
+
+	<!-- PAGE LAYOUTS -->
+	<types>
+		<name>Layout</name>
+		<!-- Example: <members>Object_Name__c-Page Layout Name</members> -->
+        
+	</types>
+
+
+	<!-- LIGHTNING WEB COMPONENTS -->
+	<types>
+		<name>LightningComponentBundle</name>
+		<!-- Example: <members>lwcName</members> -->
+
+	</types>
+
+
+	<!-- LIST VIEWS -->
+	<types>
+		<name>ListView</name>
+		<!-- Example: <members>Object_API_Name__c.List_View_Name</members> -->
+
+	</types>
+
+	<!-- PERMISSION SETS -->
+	<types>
+		<name>PermissionSet</name>
+		<!-- Example: <members>Permission_Set_Name</members> -->
+
+	</types>
+
+
+	<!-- STATIC RESOURCES -->
+	<types>
+		<name>StaticResource</name>
+		<!-- Example: <members>StaticResourceName</members> -->
+
+    </types>
+  
+</Package>
