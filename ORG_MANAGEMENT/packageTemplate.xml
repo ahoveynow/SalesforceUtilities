@@ -84,7 +84,7 @@
 	<!-- CUSTOM FIELDS (sfdx folder: objects/[Object_API_Name__c]/fields) -->
 	<types>
 		<name>CustomField</name>
-		<!-- Example: <members>Object_API_Name__c.Custom_Field_AP_Name__c</members> -->
+		<!-- Example: <members>Object_API_Name__c.Custom_Field_API_Name__c</members> -->
 
 	</types>
 
