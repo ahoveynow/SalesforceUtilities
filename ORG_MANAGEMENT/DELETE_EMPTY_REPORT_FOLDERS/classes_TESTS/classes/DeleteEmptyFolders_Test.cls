@@ -8,8 +8,9 @@
 @isTest
 public without sharing class DeleteEmptyFolders_Test {
 
+    /* USELESS TEST CLASS! I haven't had time to write a proper one. */
     @isTest
-    static void verifyFunctionality() {
-
+    static void runTest() {
+        new DeleteEmptyFolders().processEmptyFolders(true);
     }
 }

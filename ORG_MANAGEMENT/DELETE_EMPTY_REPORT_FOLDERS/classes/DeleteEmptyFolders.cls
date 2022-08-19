@@ -128,17 +128,16 @@ public without sharing class DeleteEmptyFolders {
             // If this folder or ANY of its descendent folders have at least one report, it is not empty.
             if (reportsInCurrentFolder == 0) {
                 if (deletedReportsInCurrentFolder == 0) {
+                    System.debug('READY FOR DELETION >>> ' + currentNode.folderRecord.Name);
                     emptyFolders.add(currentNode.folderRecord);
-                    System.debug('Found Empty Folder: ' + currentNode.folderRecord.Name);
                 } else {
                     emptyFoldersButWithDeletedReports.add(currentNode.folderRecord);
-                    System.debug('Found Empty Folder BUT with Deleted reports: ' + currentNode.folderRecord.Name);
+                    System.debug('Empty but has recycled folders >>> ' + currentNode.folderRecord.Name);
                 }
-            } else {
-                System.debug('Found folder with descendents: ' + currentNode.folderRecord.Name + ' (' + totalDescendentReports + ')');
             }
 
             totalDescendentReports += reportsInCurrentFolder;
+            totalDeletedDescendentReports += deletedReportsInCurrentFolder;
         }
 
         return new Map<String, Integer> {
@@ -158,7 +157,7 @@ public without sharing class DeleteEmptyFolders {
          * - Andrew Hovey
          */
 
-        String packageXml = '<!--?xml version="1.0" encoding="UTF-8"?-->\n';
+        String packageXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
         packageXml += '<package xmlns="http://soap.sforce.com/2006/04/metadata">\n';
         packageXml += '<version>53.0</version>\n</package>';
         
@@ -186,7 +185,7 @@ public without sharing class DeleteEmptyFolders {
         String boundary = '--------------------------BOUNDARY';
         String endPoint = System.URL.getOrgDomainUrl().toExternalForm() + '/services/data/v53.0/metadata/deployRequest';
         
-        String deploymentOptions =  '{"deployOptions" :{"allowMissingFiles" : false,"autoUpdatePackage" : false,"checkOnly" : false,"ignoreWarnings" : false, "performRetrieve" : false,"purgeOnDelete" : false,"rollbackOnError" : false,"runTests" : null,"runAllTests":false, "singlePackage" : true,"testLevel" : "NoTestRun"}}';
+        String deploymentOptions =  '{"deployOptions" :{"allowMissingFiles" : false,"autoUpdatePackage" : false,"checkOnly" : false,"ignoreWarnings" : false, "performRetrieve" : false,"purgeOnDelete" : false,"rollbackOnError" : true,"runTests" : ["DeleteEmptyFolders_Test"],"runAllTests":false, "singlePackage" : true,"testLevel" : "RunSpecifiedTests"}}';
         
         String header = '--' + boundary + crlf
                     + 'Content-Disposition: form-data; name="entity_content"' + crlf
@@ -232,11 +231,14 @@ public without sharing class DeleteEmptyFolders {
         req.setHeader('Content-Length', String.valueof(req.getBodyAsBlob().size()));
         
         Http http = new Http();
-        HttpResponse res = http.send(req);
-        //System.debug('status code ==>:'+ res.getStatusCode());
-        //System.debug('response body ==>:'+ res.getBody());
-    
-        String response = res.getBody();
+
+        if (Test.IsRunningTest() == false) {
+            HttpResponse res = http.send(req);
+            String response = res.getBody();
+            System.debug('================================');
+            System.debug('An Async deployment has been initiated. Go to Deployment Status setup page to view progress.');
+            System.debug('API Response: ' + response);
+        }
     }
 
 
