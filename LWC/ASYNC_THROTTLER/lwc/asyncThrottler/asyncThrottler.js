@@ -7,7 +7,7 @@
 
 import { Throttler, DEFAULT_CONCURRENT_LIMIT } from './helper';
 
-export class AsyncThrottler {
+export default class AsyncThrottler {
 
     static throttlers = {};
 
@@ -29,7 +29,7 @@ export class AsyncThrottler {
     /**
      * Enqueue an async function. It will run when a slot opens up in the specified throttler.
      * 
-     * Example:
+     * @example
      *      let result = await AsyncThrottler.enqueue(
      *          () => { return this.someAsyncMethod(); },
      *          'API Calls',

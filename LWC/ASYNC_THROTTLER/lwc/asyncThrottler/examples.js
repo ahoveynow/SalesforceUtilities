@@ -23,7 +23,7 @@
  */
 
 
-import { AsyncThrottler } from 'c/asyncThrottler';
+import AsyncThrottler from 'c/asyncThrottler';
 import { sleep } from 'c/utilities';
 
 
