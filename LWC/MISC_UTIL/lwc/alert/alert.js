@@ -80,6 +80,7 @@ export default class Alert extends LightningElement {
     get iconAdditionalStyle() {
         if (this.customIconColor) { return `--lwc-colorTextIconDefault: ${this.customIconColor};`; }
         if (this.variant === VARIANTS.CUSTOM && this.customTextColor) { return `--lwc-colorTextIconDefault: ${this.customTextColor};`; }
+        if (this.variant === VARIANTS.BASE) { return '--lwc-colorTextIconDefault: white;'; }
         return '';
     }
 
