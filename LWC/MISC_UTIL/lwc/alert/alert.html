@@ -1,0 +1,31 @@
+<!--
+ * MIT License
+ * Copyright (c) 2022 Andrew Hovey
+ * Full License Text: https://ahovey.com/MITLicense.html
+ * The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
+-->
+
+<template>
+    <div class={wrapperCssClasses} style={wrapperAdditionalStyle} role="alert">
+        <lightning-icon
+            icon-name={iconName}
+            size="x-small"
+            class="slds-m-right_small"
+            style={iconAdditionalStyle}
+        ></lightning-icon>
+
+        <div>
+            <slot></slot>
+        </div>
+
+        <div class="slds-notify__close">
+            <lightning-icon
+                if:false={suppressCloseButton}
+                class="cursor-pointer"
+                icon-name='utility:close'
+                size="x-small"
+                onclick={handleClose}
+            ></lightning-icon>
+        </div>
+    </div>
+</template>
