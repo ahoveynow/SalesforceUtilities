@@ -65,7 +65,8 @@ export default class Alert extends LightningElement {
 
     /**
      * A custom css-compatible color for the icon.
-     * If set, this value will override other defined colors, regardless of variant.
+     * If set, this value will override other defined colors.
+     * NOTE: This property does NOT work on the warning variant.
      * @type {String}
      */
     @api customIconColor;
@@ -78,9 +79,9 @@ export default class Alert extends LightningElement {
     /***************/
 
     get iconAdditionalStyle() {
-        if (this.customIconColor) { return `--lwc-colorTextIconDefault: ${this.customIconColor};`; }
+        if (this.customIconColor) { return `--lwc-colorTextIconDefault: ${this.customIconColor} !important;`; }
         if (this.variant === VARIANTS.CUSTOM && this.customTextColor) { return `--lwc-colorTextIconDefault: ${this.customTextColor};`; }
-        if (this.variant === VARIANTS.BASE) { return '--lwc-colorTextIconDefault: white;'; }
+        if ([VARIANTS.BASE,VARIANTS.ERROR].includes(this.variant)) { return '--lwc-colorTextIconDefault: white;'; }
         return '';
     }
 
