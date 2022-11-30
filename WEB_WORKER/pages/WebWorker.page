@@ -219,7 +219,7 @@
         
         const execute_dynamicJS = async (workerId, requestId, code, methodToCall, methodParams = [], keepAlive = false) => {
             /* Add code to what was provided by the user:
-                - getBaseUrl(): Allows user's code to access relative resources, eg. importScripts(getBaseUrl() + '/resource/maplibs/turf.min.js');
+                - getBaseUrl(): Allows user's code to access relative resources, eg. importScripts(getBaseUrl() + '/resource/mapping/turf.min.js');
                 - event listener to call a function
                 - Posts a message when the code is loaded (this is on the last line, which is how we know the code has fully loaded)
             */
