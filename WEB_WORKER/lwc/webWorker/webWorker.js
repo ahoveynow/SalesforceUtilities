@@ -142,8 +142,24 @@ const WorkerRequest = class {
  
 export default class WebWorker extends LightningElement {
  
+    /**
+     * The instance of the WebWorker LWC that is in use.
+     * Multiple can be loaded, but only one will be in use at one time.
+     * The one in use is the singleton, and the rest are held in reserve
+     * in the webWorkerComponentInstances array.
+     * @type {WebWorker}
+     */
     static singleton;
+
+    /**
+     * @type {Object.<String, WorkerWrapper>}
+     */
     static workers = {}; // Values are instances of WorkerWrapper
+
+    /**
+     * Instances of the WebWorker LWC.
+     * @type {WebWorker[]}
+     */
     static webWorkerComponentInstances = [];
 
     visualforcePageUrl;
