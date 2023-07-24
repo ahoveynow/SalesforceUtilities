@@ -5,9 +5,9 @@
 # -----------------------------------------------------
 
 # USAGE:
-# python3 csvToSource.py 
+# python3 convertCsvToSource.py 
 #   --sourceFile ../Some_Config__c_from_org.csv 
-#   --destinationFolder dataConfig
+#   --destinationFolder dataConfig/Some_Config__c
 #   --upsertField Static_ID__c
 #   --objectName Some_Config__c
 
@@ -44,7 +44,7 @@ def processParams():
     # destinationFolder
     destinationFolder = ('destinationFolder' in params.keys() and params['destinationFolder'])
     if not destinationFolder:
-        util.exitWithFailure('You must specify the destination folder with the --destinationFolder flag. Do not include the object name in this path.')
+        util.exitWithFailure('You must specify the destination folder with the --destinationFolder flag.')
     print(f'destinationFolder: {destinationFolder}')
 
     # upsertField
@@ -86,14 +86,13 @@ def extractCsvRecords():
 ### WRITE RECORDS TO JSON FILES ###
 
 def writeRecordsToJsonFiles():
-    folderLocation = f'{destinationFolder}/{objectName}'
-    os.makedirs(folderLocation, exist_ok=True)
+    os.makedirs(destinationFolder, exist_ok=True)
 
     for record in csvFileRecords:
-        fileName = f'{folderLocation}/{record[upsertField]}.json'
+        fileName = f'{destinationFolder}/{record[upsertField]}.json'
         print(f'Writing to {fileName}')
         fileToWrite = open(fileName, 'w')
-        fileToWrite.write(json.dumps(record, indent = 4, sort_keys=True))
+        fileToWrite.write(json.dumps(record, indent = 4, sort_keys = True))
         fileToWrite.close()
 
 
