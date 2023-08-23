@@ -1,0 +1,61 @@
+<!--
+ * MIT License
+ * Copyright (c) 2022 Andrew Hovey
+ * Full License Text: https://ahovey.com/MITLicense.html
+ * The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
+-->
+
+<template>
+    
+    <!-- TODO: Add Internal Searchbar -->
+    <div class="header-utilities">
+
+    </div>
+
+    <!-- Datatable and Pagination -->
+    <div class="datatable-and-pagination-wrapper" data-hide={showNoResultsFound}>
+        <div class="datatable-wrapper" style={datatableWrapperStyle}>
+            <lightning-datatable
+                key-field={keyField}
+                data={pagination_reactive.paginatedData}
+                columns={columns}
+                hide-checkbox-column
+
+                onrowaction={handleDatatableRowAction}
+            ></lightning-datatable>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="pagination-wrapper slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-top_small">
+            <!-- Record Count (eg. "21-40 of 87")-->
+            <div class="record-count no-wrap slds-m-right_medium">
+                {pagination_reactive.recordCountString}
+            </div>
+
+            <!-- Page Selection -->
+            <div class="pagination-backing slds-grid slds-wrap">
+                <template for:each={pagination_reactive.pages} for:item="page">
+                    <div key={page.pageNumber} class="page-number slds-p-horizontal_small" data-is-selected={page.isSelected} data-page-index={page.index} onclick={handlePageChange}>
+                        {page.pageNumber}
+                    </div>
+                </template>
+            </div>
+
+            <!-- Page Size Selection -->
+            <div class="slds-grid slds-grid_vertical-align-center slds-m-left_medium">
+                <span class="no-wrap slds-m-right_x-small">
+                    Per page:
+                </span>
+                <lightning-button-group class="page-size-selection-buttons">
+                    <template for:each={pagination_reactive.pageSizeOptions} for:item="pageSizeOption">
+                        <lightning-button key={pageSizeOption.value} label={pageSizeOption.value} variant={pageSizeOption.variant} onclick={handlePageSizeSelection}></lightning-button>
+                    </template>
+                </lightning-button-group>
+            </div>
+        </div>
+    </div>
+
+    <div if:true={showNoResultsFound} class="no-results-found slds-text-title_caps slds-p-vertical_small slds-p-left_medium">
+        No results found
+    </div>
+</template>

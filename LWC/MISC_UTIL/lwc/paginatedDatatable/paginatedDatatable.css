@@ -1,0 +1,67 @@
+.datatable-and-pagination-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.datatable-and-pagination-wrapper[data-hide=true] {
+    display: none;
+}
+
+.datatable-wrapper {
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
+
+:host lightning-datatable {
+    --slds-c-button-line-height: 1rem;
+}
+
+.no-results-found {
+    color: gray;
+}
+
+.pagination-wrapper {
+    /*flex: 0 1 auto;*/
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+}
+
+.record-count {
+    font-style: italic;
+}
+
+.pagination-backing {
+    border-radius: 10px;
+    background-color: #E8E8E8;
+}
+
+.page-number {
+    cursor: pointer;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.page-number[data-is-selected=false]:hover {
+    color: blue;
+}
+
+.page-number[data-is-selected=true] {
+    font-weight: bold;
+    color: white;
+    cursor: default;
+    background-color: blue;
+    border-radius: 10px;
+}
+
+:host .page-size-selection-buttons {
+    --slds-c-button-line-height: 1rem;
+    --slds-c-button-neutral-spacing-inline-start: .5rem;
+    --slds-c-button-neutral-spacing-inline-end: .5rem;
+    --slds-c-button-brand-spacing-inline-start: .5rem;
+    --slds-c-button-brand-spacing-inline-end: .5rem;
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
