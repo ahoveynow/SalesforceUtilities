@@ -1,0 +1,162 @@
+<template>
+    <div class="slds-form-element">
+        <label if:true={showLabel} class="slds-form-element__label" for="searchComboBox">
+            <abbr if:true={required} class="slds-required" title="required">*</abbr>
+            {label}
+            <lightning-helptext if:true={fieldLevelHelp} class="slds-m-left_xx-small slds-p-bottom_large" content={fieldLevelHelp}></lightning-helptext>
+        </label>
+        <div class="slds-form-element__control">
+            <div class="slds-combobox_container">
+                <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open"
+                    aria-haspopup="listbox"
+                    role="combobox"
+                >
+
+                    <!-- Non-dropdown Input box (with or without value) -->
+                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_left-right"
+                         role="none">
+
+                         <!-- Input box when selection has been made -->
+                        <div if:true={selection} class="selectedOption">
+                            <span
+                                if:true={selection.backupIcon}
+                                class="slds-icon_container slds-combobox__input-entity-icon"
+                                title={selection.label}
+                            >
+                                <lightning-icon
+                                    icon-name={selection.backupIcon}
+                                    alternative-text={selection.backupIcon}
+                                    size="x-small"
+                                ></lightning-icon>
+                                <span class="slds-assistive-text">{selection.subtext}</span>
+                            </span>
+                            <input type="text"
+                                   class="slds-input slds-combobox__input slds-combobox__input-value search-result_left-pad"
+                                   id="selectedOption"
+                                   aria-controls="notapplicable"
+                                   autocomplete="off"
+                                   role="textbox"
+                                   readonly=""
+                                   value={selection.label}
+                                   disabled={disabled}
+                            />
+                            <button class="slds-button slds-button_icon slds-input__icon slds-input__icon_right"
+                                    title="Clear selection"
+                                    if:false={disabled}
+                            >
+                                <lightning-icon icon-name="utility:clear"
+                                                alternative-text="clear"
+                                                size="x-small"
+                                                onclick={handleRemoveSelection}
+                                ></lightning-icon>
+                                <span class="slds-assistive-text">Clear selection</span> 
+                            </button>
+                        </div>
+
+                        <!-- Input box when there's not a selection -->
+                        <div if:false={selection} 
+                            onfocusin={focusManager.handleTextboxFocusIn}
+                            onfocusout={focusManager.handleTextboxFocusOut}
+                        >
+                            <span class="slds-icon_container"
+                                  title="Search"
+                            >
+                                <lightning-icon icon-name="utility:search"
+                                                size="x-small"
+                                                alternative-text="Search"
+                                                class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default"
+                                >
+                                </lightning-icon>
+                            </span>
+                            <input type="text"
+                                class="slds-input search-input-class"
+                                id="searchComboBox"
+                                aria-autocomplete="list"
+                                aria-controls="resultsBox"
+                                autocomplete="off"
+                                role="textbox"
+                                value={search.searchTermRender}
+                                disabled={disabled}
+                                placeholder={placeholder}
+                                required={required}
+                                onkeyup={search.handleKeyPress}
+                                onfocusin={handleOpenDropdown}
+                            />
+                        </div>
+                    </div>
+
+                    <!-- DROPDOWN CONTENT -->
+                    <div style="position: relative; ">
+                    <div
+                        data-processing={search.processing}
+                        class="results-box shade-during-processing slds-hide slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid"
+                        role="listbox"
+                        onfocusin={focusManager.handleDropdownFocusIn}
+                        onfocusout={focusManager.handleDropdownFocusOut}
+                        tabindex="0"
+                    >
+                        <ul class="slds-listbox slds-listbox_vertical"
+                            role="group"
+                        >
+                            <template for:each={optionsToDisplay.results}
+                                      role="presentation"
+                                      for:item="headerValue">
+                                <li key={headerValue.header}
+                                    class="slds-listbox__item"
+                                >
+                                    <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small"
+                                        role="presentation"
+                                    >
+                                        <span class="slds-text-title_caps" role="presentation">
+                                            <lightning-formatted-rich-text value={headerValue.markedHeader}></lightning-formatted-rich-text>
+                                        </span>
+                                    </div>
+                                    <template for:each={headerValue.listObjects}
+                                              for:item="listObject">
+                                        <li key={listObject.value}
+                                            role="presentation"
+                                            class="slds-listbox__item"
+                                            data-value={listObject.value}
+                                            onclick={handleSelection}
+                                        >
+                                            <div class="shade-during-processing slds-media slds-listbox__option slds-listbox__option_plain slds-media_small slds-listbox__option_has-meta"
+                                                 role="option"
+                                            >
+                                                <div class="slds-grid slds-grid_vertical-align-center">
+                                                    <lightning-icon if:true={listObject.backupIcon}
+                                                                    icon-name={listObject.backupIcon}
+                                                                    size="x-small"
+                                                                    alternative-text={listObject.backupIcon}
+                                                                    class="slds-m-right_small"
+                                                    ></lightning-icon>
+                                                    <span class="slds-media__body slds-grid slds-grid_vertical">
+                                                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">
+                                                            <lightning-formatted-rich-text value={listObject.markedLabel}></lightning-formatted-rich-text>
+                                                        </span>
+                                                        <span if:true={listObject.subtext} class="slds-listbox__option-meta slds-listbox__option-meta_entity">
+                                                            <lightning-formatted-rich-text value={listObject.markedSubtext}></lightning-formatted-rich-text>
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </template>
+                                </li>
+                            </template>
+
+                            <li if:false={optionsToDisplay.size} class="slds-listbox__item">
+                                <div 
+                                    class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small slds-text-title_caps"
+                                    role="presentation"
+                                >
+                                    No results found
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

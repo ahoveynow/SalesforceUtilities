@@ -1,0 +1,13 @@
+.results-box {
+    z-index: 100;
+}
+
+.shade-during-processing[data-processing=true], .results-box[data-processing=true] .shade-during-processing
+{
+    background-color: lightgray;
+    cursor: wait;
+}
+
+.object-icon-span{
+	width: auto !important;
+}
