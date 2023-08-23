@@ -67,7 +67,7 @@ def processParams():
 def extractCsvRecords():
     global csvFileRecords
 
-    csvFileContent = open(sourceFile)
+    csvFileContent = open(sourceFile, encoding='utf8')
     csvReader = csv.DictReader(csvFileContent)
     csvFileRecords = []
     for csvRow in csvReader:
