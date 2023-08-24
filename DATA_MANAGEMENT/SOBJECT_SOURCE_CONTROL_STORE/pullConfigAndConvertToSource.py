@@ -4,6 +4,8 @@
 # The above abbreviated copyright notice shall be included in all copies or substantial portions of the Software.
 # -----------------------------------------------------
 
+# https://github.com/ahoveynow/SalesforceUtilities/blob/main/DATA_MANAGEMENT/SOBJECT_SOURCE_CONTROL_STORE
+
 # USAGE (from repo root):
 # python dataConfig/__scripts/pullConfigAndConvertToSource.py
 #	--orgAlias qap02
@@ -117,9 +119,24 @@ def validateObjects():
 
 def queryRecords(objectDetails):
 	print(f'Querying records for {objectDetails["name"]}...')
-	queryCommand = f'sfdx force:data:soql:query --resultformat csv -u {orgAlias} --query "SELECT {",".join(objectDetails["fields"])} FROM {objectDetails["name"]} {objectDetails["whereClause"]} " > "{csvDirectory}/{objectDetails["name"]}.csv"'
+	os.makedirs(csvDirectory, exist_ok=True)
+	csvFileName = f'{csvDirectory}/{objectDetails["name"]}.csv'
+	queryCommand = f'sfdx force:data:soql:query --result-format csv --wait 10 -u {orgAlias} --query "SELECT {",".join(objectDetails["fields"])} FROM {objectDetails["name"]} {objectDetails["whereClause"]} " > "{csvFileName}"'
 	print(queryCommand)
 	os.system(queryCommand)
+
+	# Remove warnings
+	csvLines = []
+	with open(csvFileName, 'r', encoding='utf8') as fileReader:
+		csvLines = fileReader.readlines()
+	
+	with open(csvFileName, 'w', encoding='utf8') as fileWriter:
+		startOfFileFound = False
+		for number, line in enumerate(csvLines):
+			if not startOfFileFound and line.startswith('Warning:'):
+				continue
+			startOfFileFound = True
+			fileWriter.write(line)
 
 
 
