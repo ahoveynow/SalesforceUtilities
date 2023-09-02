@@ -25,6 +25,7 @@ const sfRootUrl = `${document.location.protocol}//${host.substring(0, host.index
 const visualforceTargets = [
     sfRootUrl + '--c.visualforce.com',
     sfRootUrl + '--c.vf.force.com',
+    sfRootUrl + '--c.scratch.vf.force.com',
     sfRootUrl + '--c.InstanceName.visual.force.com',
 ];
 
