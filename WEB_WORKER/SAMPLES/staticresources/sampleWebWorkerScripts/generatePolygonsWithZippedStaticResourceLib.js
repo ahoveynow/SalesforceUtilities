@@ -1,0 +1,1 @@
+importScripts(getBaseUr() + '/resource/turfZipped/someFolder/turf.min.js');
