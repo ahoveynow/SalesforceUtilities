@@ -8,12 +8,12 @@
 
 # USAGE (from repo root):
 # python dataConfig/__scripts/pullConfigAndConvertToSource.py
-#	--orgAlias qap02
+#	--orgAlias mySampleOrg
 #	--objects "Some_Object_1__c, Some_Object_2__c"
 
 # USAGE (from dataConfig/__scripts directory):
 # python pullConfigAndConvertToSource.py
-#	--orgAlias qap02
+#	--orgAlias mySampleOrg
 #	--csvDirectory ../__csv
 #	--destinationFolder ../
 #	--pythonScriptDir ./
@@ -30,7 +30,7 @@ SMALL_SPACER = '==============='
 
 
 # Params
-orgAlias = 'qap01'							# the sfdx org alias
+orgAlias = 'mySampleOrg'							# the sfdx org alias
 csvDirectory = 'dataConfig/__csv'			# directory where the intermediate csv files will be stored
 destinationFolder = 'dataConfig'			# directory where the source control config records will reside
 pythonCommand = 'python' 					# some installations use python3 rather than python
