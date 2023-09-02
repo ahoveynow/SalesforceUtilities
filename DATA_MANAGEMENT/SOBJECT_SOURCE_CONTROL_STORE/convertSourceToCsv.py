@@ -94,7 +94,7 @@ def writeRecordsToCsv():
 			fields.add(fieldName)
 
 	os.makedirs(os.path.dirname(destinationFile), exist_ok=True)
-	with open(destinationFile, 'w', newline='') as csvfile:
+	with open(destinationFile, 'w', newline='', encoding='utf8') as csvfile:
 		writer = csv.DictWriter(csvfile, fieldnames = sorted(fields), extrasaction = 'ignore')
 		writer.writeheader()
 		writer.writerows(records)
