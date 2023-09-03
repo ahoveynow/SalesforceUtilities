@@ -30,7 +30,7 @@ SMALL_SPACER = '==============='
 
 
 # Params
-orgAlias = 'mySampleOrg'							# the sfdx org alias
+orgAlias = 'mySampleOrg'					# the sfdx org alias
 csvDirectory = 'dataConfig/__csv'			# directory where the intermediate csv files will be stored
 destinationFolder = 'dataConfig'			# directory where the source control config records will reside
 pythonCommand = 'python' 					# some installations use python3 rather than python
@@ -45,7 +45,7 @@ objects = validObjects.keys()				# Passed as a comma-separated list of object AP
 def processParams():
 	global orgAlias, csvDirectory, objects, destinationFolder, pythonCommand, pythonScriptDir
 	params = util.getArgParams()
-	print('======= PARAMS =======\nThese can be set with full text flag, eg. --orgAlias devd01\n')
+	print('======= PARAMS =======\nThese can be set with full text flag, eg. --orgAlias mySampleOrg\n')
 
 	# orgAlias
 	orgAliasParam = ('orgAlias' in params.keys() and params['orgAlias'])
