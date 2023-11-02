@@ -76,6 +76,25 @@ def compileDictFromSource():
 		if fileNamesArray and record[record['__upsertField']] not in fileNamesArray:
 			continue # If only including a subset, and this file is not part of that subset, skip it.
 
+		# There are some nuances to setting blank values
+		# For non-lookup fields, a blank value must be set as "#N/A"
+		# For lookup fields, we use external IDs (eg. Related_Object__r.Name)
+		#  - When setting a value for a lookup field,  Related_Object__r.External_ID__c should have the value (eg. "Some Name"), and Related_Object__c should be an empty string ("")
+		#  - When the value is blank for lookup field, Related_Object__r.External_ID__c should be an empty string (""), and Related_Object__c should be "#N/A"
+		processedRecord = {}
+		for field_name, field_value in record.items():
+			if '.' in field_name:
+				externalIdField = field_name
+				directLookup = field_name.split('.')[0].rstrip('r') + 'c' # Object__r.Name becomes Object__c
+				if field_value == "":
+					processedRecord[externalIdField] = ""
+					processedRecord[directLookup] = "#N/A"
+				else:
+					processedRecord[externalIdField] = field_value
+					processedRecord[directLookup] = ""
+			else:
+				processedRecord[field_name] = field_value if field_value != "" else "#N/A"
+
 		records.append(record)
 
 	print(f'Records: {len(records)}')
