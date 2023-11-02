@@ -85,7 +85,14 @@ def compileDictFromSource():
 		for field_name, field_value in record.items():
 			if '.' in field_name:
 				externalIdField = field_name
-				directLookup = field_name.split('.')[0].rstrip('r') + 'c' # Object__r.Name becomes Object__c
+				directLookup = None # The lookup field someone would query to get the ID of the related record.
+
+				lookupField = field_name.split('.')[0]
+				if (lookupField[-1] == 'r'): # Custom field
+					directLookup = lookupField.rstrip('r') + 'c' # Object__r.Name becomes Object__c
+				else: # Standard field
+					directLookup = lookupField + 'Id' # Account.Name becomes AccountId
+
 				if field_value == "":
 					processedRecord[externalIdField] = ""
 					processedRecord[directLookup] = "#N/A"
@@ -95,7 +102,7 @@ def compileDictFromSource():
 			else:
 				processedRecord[field_name] = field_value if field_value != "" else "#N/A"
 
-		records.append(record)
+		records.append(processedRecord)
 
 	print(f'Records: {len(records)}')
 
