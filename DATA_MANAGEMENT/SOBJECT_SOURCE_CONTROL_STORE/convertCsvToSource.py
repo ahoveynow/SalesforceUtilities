@@ -12,6 +12,7 @@
 #   --destinationFolder dataConfig/Some_Config__c
 #   --upsertField Static_ID__c
 #   --objectName Some_Config__c
+#	--jsonFields Some_Json_Field_1__c,Some_Json_Field_2__c
 
 
 import util
@@ -24,17 +25,18 @@ sourceFile = None
 destinationFolder = None
 upsertField = None
 objectName = None
+jsonFields = None
 
 # Other variables
 csvFileRecords = []
-
+jsonFieldsArray = []
 
 
 ######################
 ### PROCESS PARAMS ###
 
 def processParams():
-	global sourceFile, destinationFolder, upsertField, objectName
+	global sourceFile, destinationFolder, upsertField, objectName, jsonFields, jsonFieldsArray
 	params = util.getArgParams()
 
 	# sourceFile
@@ -61,6 +63,14 @@ def processParams():
 		util.exitWithFailure('You must specify the Object\'s API name with the --objectName flag')
 	print(f'objectName: {objectName}')
 
+	# jsonFields
+	jsonFields = ('jsonFields' in params.keys() and params['jsonFields'])
+	if jsonFields:
+		jsonFieldsArray = jsonFields.split(',')
+		for index, fileName in enumerate(jsonFieldsArray):
+			jsonFieldsArray[index] = fileName.strip()
+		print(f'jsonFields: {jsonFields}')
+
 
 
 ###########################
@@ -73,9 +83,27 @@ def extractCsvRecords():
 	csvReader = csv.DictReader(csvFileContent)
 	csvFileRecords = []
 	for csvRow in csvReader:
+
+		# Revert #N/A to empty string ('') for source management
+		for fieldName, fieldValue in csvRow.items():
+			if fieldValue == '#N/A':
+				csvRow[fieldName] = ''
+
 		csvRow['__SObjectType'] = objectName
 		csvRow['__upsertField'] = upsertField
+
+		# Render JSON Objects on multiple lines
+		for jsonFieldName in jsonFieldsArray:
+			try:
+				jsonFieldValue = csvRow[jsonFieldName]
+				jsonAsObject = json.loads(jsonFieldValue)
+				csvRow[jsonFieldName] = jsonAsObject
+			except:
+				continue
+
 		csvFileRecords.append(csvRow)
+	
+	csvFileContent.close()
 
 	# TEMPORARY FIX DUE TO CLI BUG: https://github.com/forcedotcom/cli/issues/1447
 	for record in csvFileRecords:
@@ -95,7 +123,7 @@ def writeRecordsToJsonFiles():
 		fileName = f'{destinationFolder}/{record[upsertField]}.json'
 		print(f'Writing to {fileName}')
 		fileToWrite = open(fileName, 'w')
-		fileToWrite.write(json.dumps(record, indent = 4, sort_keys = True))
+		json.dump(record, fileToWrite, indent = '\t', sort_keys = True)
 		fileToWrite.close()
 
 
