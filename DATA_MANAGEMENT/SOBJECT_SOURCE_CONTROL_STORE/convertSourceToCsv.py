@@ -99,6 +99,9 @@ def compileDictFromSource():
 				else:
 					processedRecord[externalIdField] = field_value
 					processedRecord[directLookup] = ""
+			
+			elif type(field_value) == 'dict':
+				processedRecord[field_name] = json.dumps(field_value, indent='\t')
 			else:
 				processedRecord[field_name] = field_value if field_value != "" else "#N/A"
 
