@@ -12,10 +12,14 @@ OBJECT_CONFIG = {
 		'name': 'Some_Object_1__c', # Must match the dictionary key
 		'upsertField': 'Name', # The field that will be used for upsert. Can be name or another indexed field.
 		'whereClause': "", # Any SOQL WHERE conditions to include when querying the records. Other clauses may be included as well, if necessary (eg. LIMIT)
+		'jsonFields': [
+			'Some_Json_Field__c',
+		],
 		'fields': [ # an array of fields (including relationship fields) to query
 			'Name',
 			'Some_Field_A__c',
 			'Some_Field_B__c',
+			'Some_Json_Field__c',
 			'Related_Record__r.Name',
 		]
 	},
