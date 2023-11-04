@@ -145,8 +145,15 @@ def queryRecords(objectDetails):
 ### CONVERT CSV TO SOURCE ###
 
 def convertCsvToSource(objectDetails):
-	print(f'Converting {objectDetails["name"]} into source control...')
-	convertCommand = f'{pythonCommand} "{pythonScriptDir}/convertCsvToSource.py" --sourceFile "{csvDirectory}/{objectDetails["name"]}.csv" --destinationFolder "{destinationFolder}/{objectDetails["name"]}" --upsertField {objectDetails["upsertField"]} --objectName {objectDetails["name"]}'
+	objectName = objectDetails["name"]
+	print(f'Converting {objectName} into source control...')
+	jsonFields = validObjects[objectName]['jsonFields']
+	if jsonFields and len(jsonFields) > 0:
+		jsonFields = ','.join(jsonFields)
+		jsonFields = f' --jsonFields "{jsonFields}" '
+	else:
+		jsonFields = ''
+	convertCommand = f'{pythonCommand} "{pythonScriptDir}/convertCsvToSource.py" --sourceFile "{csvDirectory}/{objectDetails["name"]}.csv" --destinationFolder "{destinationFolder}/{objectDetails["name"]}" --upsertField {objectDetails["upsertField"]} --objectName {objectDetails["name"]} {jsonFields}'
 	print(convertCommand)
 	os.system(convertCommand)
 
