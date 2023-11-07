@@ -35,9 +35,13 @@ jsonFieldsArray = []
 ######################
 ### PROCESS PARAMS ###
 
-def processParams():
+def processParams(directParams):
 	global sourceFile, destinationFolder, upsertField, objectName, jsonFields, jsonFieldsArray
-	params = util.getArgParams()
+
+	if directParams:
+		params = directParams
+	else:
+		params = util.getArgParams()
 
 	# sourceFile
 	sourceFile = ('sourceFile' in params.keys() and params['sourceFile'])
@@ -131,11 +135,11 @@ def writeRecordsToJsonFiles():
 ###############
 ### EXECUTE ###
 
-def execute():
-	processParams()
+def execute(directParams):
+	processParams(directParams)
 	extractCsvRecords()
 	writeRecordsToJsonFiles()
 
 
-
-execute()
+if __name__ == '__main__':
+	execute()

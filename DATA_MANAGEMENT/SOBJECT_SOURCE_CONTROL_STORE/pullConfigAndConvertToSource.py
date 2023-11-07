@@ -16,11 +16,11 @@
 #	--orgAlias mySampleOrg
 #	--csvDirectory ../__csv
 #	--destinationFolder ../
-#	--pythonScriptDir ./
 #	--objects "Some_Object_1__c, Some_Object_2__c"
 
 import os
 import util
+import convertCsvToSource
 
 from objectConfig import OBJECT_CONFIG
 
@@ -33,8 +33,6 @@ SMALL_SPACER = '==============='
 orgAlias = 'mySampleOrg'					# the sfdx org alias
 csvDirectory = 'dataConfig/__csv'			# directory where the intermediate csv files will be stored
 destinationFolder = 'dataConfig'			# directory where the source control config records will reside
-pythonCommand = 'python' 					# some installations use python3 rather than python
-pythonScriptDir = 'dataConfig/__scripts'	# directory where the scripts are stored
 objects = validObjects.keys()				# Passed as a comma-separated list of object API names to be processed (enclose in quotes if spaces are used). This becomes an array when params are processed.
 
 
@@ -43,7 +41,7 @@ objects = validObjects.keys()				# Passed as a comma-separated list of object AP
 ### PROCESS PARAMS ###
 
 def processParams():
-	global orgAlias, csvDirectory, objects, destinationFolder, pythonCommand, pythonScriptDir
+	global orgAlias, csvDirectory, objects, destinationFolder
 	params = util.getArgParams()
 	print('======= PARAMS =======\nThese can be set with full text flag, eg. --orgAlias mySampleOrg\n')
 
@@ -64,18 +62,6 @@ def processParams():
 	if destinationFolderParam:
 		destinationFolder = destinationFolderParam
 	print(f'destinationFolder: {destinationFolder}')
-
-	# pythonCommand
-	pythonCommandParam = ('pythonCommand' in params.keys() and params['pythonCommand'])
-	if pythonCommandParam:
-		pythonCommand = pythonCommandParam
-	print(f'pythonCommand: {pythonCommand}')
-
-	# pythonScriptDir
-	pythonScriptDirParam = ('pythonScriptDir' in params.keys() and params['pythonScriptDir'])
-	if pythonScriptDirParam:
-		pythonScriptDir = pythonScriptDirParam
-	print(f'pythonScriptDir: {pythonScriptDir}')
 
 	# objects
 	objectsParam = ('objects' in params.keys() and params['objects'])
@@ -144,18 +130,23 @@ def queryRecords(objectDetails):
 #############################
 ### CONVERT CSV TO SOURCE ###
 
-def convertCsvToSource(objectDetails):
+def convertCsvToSourceForObject(objectDetails):
 	objectName = objectDetails["name"]
 	print(f'Converting {objectName} into source control...')
 	jsonFields = validObjects[objectName]['jsonFields']
 	if jsonFields and len(jsonFields) > 0:
 		jsonFields = ','.join(jsonFields)
-		jsonFields = f' --jsonFields "{jsonFields}" '
 	else:
 		jsonFields = ''
-	convertCommand = f'{pythonCommand} "{pythonScriptDir}/convertCsvToSource.py" --sourceFile "{csvDirectory}/{objectDetails["name"]}.csv" --destinationFolder "{destinationFolder}/{objectDetails["name"]}" --upsertField {objectDetails["upsertField"]} --objectName {objectDetails["name"]} {jsonFields}'
-	print(convertCommand)
-	os.system(convertCommand)
+
+	parameters = {
+		'sourceFile': f'{csvDirectory}/{objectDetails["name"]}.csv',
+		'destinationFolder': f'{destinationFolder}/{objectDetails["name"]}',
+		'upsertField': {objectDetails["upsertField"]},
+		'objectName': {objectDetails["name"]},
+		'jsonFields': jsonFields
+	}
+	convertCsvToSource.execute(parameters)
 
 
 
@@ -175,10 +166,10 @@ def execute():
 			currentIndex += 1
 			print(f'{SMALL_SPACER}\nOBJECT {currentIndex} of {len(objects)}: {validObjectName}\n{SMALL_SPACER}\n')
 			queryRecords(validObjects[validObjectName])
-			convertCsvToSource(validObjects[validObjectName])
+			convertCsvToSourceForObject(validObjects[validObjectName])
 	
 	print(f'\n\n{SMALL_SPACER}{SMALL_SPACER}{SMALL_SPACER}\n{SMALL_SPACER} PROCESS COMPLETE! {SMALL_SPACER}\n{SMALL_SPACER}{SMALL_SPACER}{SMALL_SPACER}')
 
 
-
-execute()
+if __name__ == '__main__':
+	execute()
