@@ -281,5 +281,5 @@ def execute():
 	print(f'\n\n{SMALL_SPACER}{SMALL_SPACER}{SMALL_SPACER}\n{SMALL_SPACER} PROCESS COMPLETE! {SMALL_SPACER}\n{SMALL_SPACER}{SMALL_SPACER}{SMALL_SPACER}')
 
 
-
-execute()
+if __name__ == '__main__':
+	execute()

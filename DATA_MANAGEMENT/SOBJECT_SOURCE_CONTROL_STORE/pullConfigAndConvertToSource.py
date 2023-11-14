@@ -133,7 +133,7 @@ def queryRecords(objectDetails):
 def convertCsvToSourceForObject(objectDetails):
 	objectName = objectDetails["name"]
 	print(f'Converting {objectName} into source control...')
-	jsonFields = validObjects[objectName]['jsonFields']
+	jsonFields = validObjects[objectName].get('jsonFields')
 	if jsonFields and len(jsonFields) > 0:
 		jsonFields = ','.join(jsonFields)
 	else:
@@ -142,8 +142,8 @@ def convertCsvToSourceForObject(objectDetails):
 	parameters = {
 		'sourceFile': f'{csvDirectory}/{objectDetails["name"]}.csv',
 		'destinationFolder': f'{destinationFolder}/{objectDetails["name"]}',
-		'upsertField': {objectDetails["upsertField"]},
-		'objectName': {objectDetails["name"]},
+		'upsertField': objectDetails["upsertField"],
+		'objectName': objectDetails["name"],
 		'jsonFields': jsonFields
 	}
 	convertCsvToSource.execute(parameters)
